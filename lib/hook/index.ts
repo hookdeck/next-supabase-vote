@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { createSupabaseBrower } from "../supabase/client";
+import { createSupabaseBrowser } from "../supabase/client";
 import { sortObject } from "../utils";
 import { IComment } from "../types";
 
 export function useGetVote(id: string) {
-	const supabase = createSupabaseBrower();
+	const supabase = createSupabaseBrowser();
 
 	return useQuery({
 		queryKey: ["vote-" + id],
@@ -35,7 +35,7 @@ export function useGetVote(id: string) {
 }
 
 export function useUser() {
-	const supabase = createSupabaseBrower();
+	const supabase = createSupabaseBrowser();
 	return useQuery({
 		queryKey: ["user"],
 		queryFn: async () => {
@@ -47,7 +47,7 @@ export function useUser() {
 }
 
 export function useComment(voteId: string) {
-	const supabase = createSupabaseBrower();
+	const supabase = createSupabaseBrowser();
 
 	return useQuery({
 		queryKey: ["vote-comment-" + voteId],

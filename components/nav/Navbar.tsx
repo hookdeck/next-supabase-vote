@@ -5,30 +5,31 @@ import Link from "next/link";
 import Profile from "./Profile";
 import LoginForm from "./LoginForm";
 import { useUser } from "@/lib/hook";
+import Config from "@/config";
 
 export default function Navbar() {
-	return (
-		<nav className=" w-full flex items-center justify-between ">
-			<Link href="/" className="flex items-center gap-2">
-				<h1 className="text-3xl font-bold">DailyVote </h1>
+  return (
+    <nav className=" w-full flex items-center justify-between ">
+      <Link href="/" className="flex items-center gap-2">
+        <h1 className="text-3xl font-bold">{Config.siteName}</h1>
 
-				<RocketIcon className="w-5 h-5  animate-lanuch transition-all transform text-green-500" />
-			</Link>
-			<RenderProfile />
-		</nav>
-	);
+        <RocketIcon className="w-5 h-5  animate-lanuch transition-all transform text-green-500" />
+      </Link>
+      <RenderProfile />
+    </nav>
+  );
 }
 
 const RenderProfile = () => {
-	const { data, isFetching } = useUser();
+  const { data, isFetching } = useUser();
 
-	if (isFetching) {
-		return <></>;
-	}
+  if (isFetching) {
+    return <></>;
+  }
 
-	if (data?.user?.id) {
-		return <Profile user={data?.user} />;
-	} else {
-		return <LoginForm />;
-	}
+  if (data?.user?.id) {
+    return <Profile user={data?.user} />;
+  } else {
+    return <LoginForm />;
+  }
 };

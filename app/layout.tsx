@@ -6,61 +6,65 @@ import Footer from "../components/Footer";
 import Navbar from "@/components/nav/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/QueryProvider";
+import Config from "@/config";
+import RegisterCheck from "@/components/phone/register-check";
+import RegisterPhone from "@/components/phone/register-phone";
 
 const inter = Space_Grotesk({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-	metadataBase: new URL("https://next-supabase-vote.vercel.app/"),
+  metadataBase: new URL("https://next-supabase-vote.vercel.app/"),
 
-	title: {
-		template: "%s | Daily Vote",
-		default: "Daily Vote",
-	},
-	authors: {
-		name: "chensokheng",
-	},
+  title: {
+    template: `%s | ${Config.siteName}`,
+    default: Config.siteName,
+  },
+  authors: Config.authors.map((author) => {
+    return {
+      name: author,
+    };
+  }),
 
-	description:
-		"Cast your vote now and see live updates on the poll results, powered by the real-time capabilities of Supabase database integration in our web app",
-	openGraph: {
-		title: "Daily Vote",
-		description:
-			"Cast your vote now and see live updates on the poll results, powered by the real-time capabilities of Supabase database integration in our web app.",
-		url: "https://next-supabase-vote.vercel.app/",
-		siteName: "Daily Vote",
-		images: "/og.png",
-		type: "website",
-	},
-	keywords: ["daily web coding", "chensokheng", "dailywebcoding"],
+  description: Config.siteDescription,
+  openGraph: {
+    title: Config.siteName,
+    description: Config.siteDescription,
+    url: Config.siteUrl,
+    siteName: Config.siteName,
+    images: "/og.png",
+    type: "website",
+  },
+  keywords: Config.keywords,
 };
 
 export default async function RootLayout({
-	children,
+  children,
 }: {
-	children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-	return (
-		<html lang="en" suppressHydrationWarning>
-			<body
-				className={`${inter.className} bg-[#09090B] text-gray-200 antialiased  py-10`}
-			>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="dark"
-					enableSystem
-					disableTransitionOnChange
-				>
-					<QueryProvider>
-						<main className="flex flex-col max-w-7xl mx-auto min-h-screen space-y-10 p-5">
-							<Navbar />
-							<div className="w-full flex-1 ">{children}</div>
-							<Footer />
-						</main>
-					</QueryProvider>
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${inter.className} bg-[#09090B] text-gray-200 antialiased  py-10`}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <main className="flex flex-col max-w-7xl mx-auto min-h-screen space-y-10 p-5">
+              <Navbar />
+              <RegisterPhone />
+              <div className="w-full flex-1 ">{children}</div>
+              <Footer />
+            </main>
+          </QueryProvider>
 
-					<Toaster position="top-center" reverseOrder={false} />
-				</ThemeProvider>
-			</body>
-		</html>
-	);
+          <Toaster position="top-center" reverseOrder={false} />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
 }

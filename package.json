@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev": "next dev -p 8080",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"
@@ -27,6 +27,7 @@
 		"class-variance-authority": "^0.7.0",
 		"clsx": "^2.0.0",
 		"date-fns": "^2.30.0",
+		"libphonenumber-js": "^1.10.60",
 		"lucide-react": "^0.294.0",
 		"next": "14.0.3",
 		"next-themes": "^0.2.1",

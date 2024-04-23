@@ -18,7 +18,7 @@ A live poll Next.js application built with Supabase, Twilio, and Hookdeck.
    NEXT_PUBLIC_SUPABASE_ANON_KEY=
    SERVICE_ROLE=
    ```
-5. Link your Supabase project locally by running `supabase link` and entering the database password you used when running `supabase projects create`.
+5. Link your Supabase project locally by running `supabase link`, selecting the project, and entering the database password you used when running `supabase projects create`.
 6. Run `supabase db push` to run the migrations on the remote database.
 7. Set up GitHub Login for the project by following the [Supabase GitHub login guide](https://supabase.com/docs/guides/auth/social-login/auth-github)
 8. Set up Twilio Verify by following the [Twilio Verify Supabase phone provider guide](https://supabase.com/docs/guides/auth/phone-login/twilio#twilio-verify)
@@ -32,22 +32,15 @@ npm run dev
 
 Open [http://localhost:8080](http://localhost:8080) with your browser to see the result.
 
-## Local Development
-
-```bash
-supabase start
-```
-
-Set up GitHub authentication with Supabase:
-https://supabase.com/docs/guides/auth/social-login/auth-github
-
 ## Learn More
 
-To learn more about Next.js and Supbase, take a look at the following resources:
+To learn more about the technologies used in this application:
 
-- [Supabase](https://supabase.com/)
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Supabase](https://supabase.com?ref=github-supapoll)
+- [Twilio Verify](https://www.twilio.com/docs/verify?ref=github-supapoll)
+- [Twilio Programmable Messaging](https://www.twilio.com/docs/messaging?ref=github-supapoll)
+- [Hookdeck](https://hookdeck.com?ref=github-supapoll)
+- [Next.js](https://nextjs.org?ref=github-supapoll)
 
 ## Credits
 

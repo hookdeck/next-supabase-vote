@@ -7,7 +7,6 @@ import Navbar from "@/components/nav/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import QueryProvider from "@/components/QueryProvider";
 import Config from "@/config";
-import RegisterCheck from "@/components/phone/register-check";
 import RegisterPhone from "@/components/phone/register-phone";
 
 const inter = Space_Grotesk({ subsets: ["latin"] });

@@ -32,6 +32,16 @@ npm run dev
 
 Open [http://localhost:8080](http://localhost:8080) with your browser to see the result.
 
+## Development
+
+To update the Supabase type definitions, run:
+
+```bash
+npx supabase gen types typescript --project-id "$PROJECT_REF" --schema public > lib/types/supabase.ts
+```
+
+See the Supabase docs for [Generating TypeScript Types](https://supabase.com/docs/guides/api/rest/generating-types).
+
 ## Learn More
 
 To learn more about the technologies used in this application:

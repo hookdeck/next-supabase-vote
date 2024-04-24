@@ -104,9 +104,10 @@ export default function Vote({ id }: { id: string }) {
               className="flex items-center w-full group cursor-pointer"
               onClick={() => castVote(key)}
             >
-              <h1 className=" w-40 line-clamp-2   text-lg break-words select-none ">
+              <h2 className=" w-40 line-clamp-2   text-lg break-words select-none ">
+                <span className="mr-2 bg-zinc-600 p-1">#{index}</span>
                 {highestKey === key ? "🎉" + key : key}
-              </h1>
+              </h2>
               <div className="flex-1 flex items-center gap-2">
                 <div className="py-3 pr-5 border-l border-zinc-400 flex-1 ">
                   <div

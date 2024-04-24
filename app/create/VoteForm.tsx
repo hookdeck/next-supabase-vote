@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "../../components/ui/input";
 import { CalendarIcon, TrashIcon } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
@@ -29,6 +29,15 @@ import { format } from "date-fns";
 import { Calendar } from "../../components/ui/calendar";
 import { createVote } from "@/lib/actions/vote";
 import { Textarea } from "../../components/ui/textarea";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { createSupabaseBrowser } from "@/lib/supabase/client";
+import { parsePhoneNumber } from "libphonenumber-js";
 
 const FormSchema = z
   .object({
@@ -42,6 +51,7 @@ const FormSchema = z
       .min(5, { message: "Title has a minimum characters of 5" }),
     description: z.string().optional(),
     end_date: z.date(),
+    phone_number: z.string(),
   })
   .refine(
     (data) => {
@@ -51,38 +61,83 @@ const FormSchema = z
     { message: "Vote option need to be uniqe", path: ["vote_options"] }
   );
 
+type FormattedNumber = {
+  e164: string;
+  displayNumber: string;
+};
+
 export default function VoteForm() {
+  const supabase = createSupabaseBrowser();
   const optionRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const [options, setOptions] = useState<{ id: string; label: string }[]>([]);
+  const [phoneNumber, setPhoneNumber] = useState("");
   const form = useForm<z.infer<typeof FormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(FormSchema),
     defaultValues: {
       title: "",
       vote_options: [],
+      phone_number: "",
     },
   });
 
-  function addOptions() {
-    const newOptions = optionRef.current.value.trim();
+  const [availablePhoneNumbers, setAvailablePhoneNumbers] = useState<
+    FormattedNumber[]
+  >([]);
+  useEffect(() => {
+    const configuredPhoneNumbers = process.env.NEXT_PUBLIC_PHONE_NUMBERS
+      ? process.env.NEXT_PUBLIC_PHONE_NUMBERS.split(",")
+      : [];
 
-    if (newOptions) {
-      if (!form.getValues("vote_options").includes(newOptions)) {
+    const getPhoneNumbers = async () => {
+      // Get phone numbers used in all active polls
+      const { error, data } = await supabase
+        .from("vote")
+        .select("phone_number")
+        .filter("end_date", "gte", new Date().toISOString());
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      const usedPhoneNumbers = data.map((number) => number.phone_number);
+      const availableNumbers = configuredPhoneNumbers
+        .filter((tel) => !usedPhoneNumbers.includes(tel))
+        .map((tel) => {
+          const parsedNumber = parsePhoneNumber(tel);
+          return {
+            e164: parsedNumber.format("E.164"),
+            displayNumber: parsedNumber.formatInternational(),
+          };
+        });
+
+      setAvailablePhoneNumbers(availableNumbers);
+    };
+
+    getPhoneNumbers();
+  }, [supabase]);
+
+  function addOptions() {
+    const optionValue = optionRef.current.value.trim();
+
+    if (optionValue) {
+      if (!form.getValues("vote_options").includes(optionValue)) {
         form.setValue("vote_options", [
           ...options.map((option) => option.id),
-          optionRef.current.value,
+          optionValue,
         ]);
+
         setOptions((options) => [
           ...options,
           {
-            id: optionRef.current.value,
-            label: optionRef.current.value,
+            id: optionValue,
+            label: optionValue,
           },
         ]);
         optionRef.current.value = "";
       } else {
-        toast.error("You can not have the same optoin.");
+        toast.error("You can not have the same option.");
       }
     }
   }
@@ -147,49 +202,53 @@ export default function VoteForm() {
                 </FormDescription>
               </div>
 
-              {options.map((item) => (
-                <FormField
-                  key={item.id}
-                  control={form.control}
-                  name="vote_options"
-                  render={({ field }) => {
-                    return (
-                      <FormItem
-                        key={item.id}
-                        className="flex justify-between items-center py-3"
-                      >
-                        <div className="flex items-center gap-2">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(item.id)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, item.id])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== item.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal text-lg">
-                            {item.label}
-                          </FormLabel>
-                        </div>
-                        <TrashIcon
-                          className="w-5 h-5 cursor-pointer hover:scale-115 transition-all"
-                          onClick={() => {
-                            setOptions((options) =>
-                              options.filter((option) => option.id !== item.id)
-                            );
-                          }}
-                        />
-                      </FormItem>
-                    );
-                  }}
-                />
-              ))}
+              {options.map((item) => {
+                return (
+                  <FormField
+                    key={item.id}
+                    control={form.control}
+                    name="vote_options"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={item.id}
+                          className="flex justify-between items-center py-3"
+                        >
+                          <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(item.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, item.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== item.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal text-lg">
+                              {item.label}
+                            </FormLabel>
+                          </div>
+                          <TrashIcon
+                            className="w-5 h-5 cursor-pointer hover:scale-115 transition-all"
+                            onClick={() => {
+                              setOptions((options) =>
+                                options.filter(
+                                  (option) => option.id !== item.id
+                                )
+                              );
+                            }}
+                          />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                );
+              })}
               <Input
                 type="text"
                 ref={optionRef}
@@ -241,6 +300,61 @@ export default function VoteForm() {
                   />
                 </PopoverContent>
               </Popover>
+
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem className="flex flex-col items-start">
+              <FormLabel>Vote by Phone Number</FormLabel>
+              {availablePhoneNumbers.length == 0 ? (
+                <FormDescription>No numbers available</FormDescription>
+              ) : (
+                <FormControl>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal justify-start"
+                        )}
+                      >
+                        {field.value || "Not enabled"}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuRadioGroup
+                        value={phoneNumber}
+                        onValueChange={(value) => {
+                          setPhoneNumber(value);
+                          field.onChange(value);
+                        }}
+                      >
+                        <DropdownMenuRadioItem value="">
+                          {availablePhoneNumbers.length == 0 ? (
+                            <span>No numbers available</span>
+                          ) : (
+                            <span>Not enabled</span>
+                          )}
+                        </DropdownMenuRadioItem>
+                        {availablePhoneNumbers.map((number) => (
+                          <DropdownMenuRadioItem
+                            key={number.e164}
+                            value={number.e164}
+                          >
+                            {number.displayNumber}
+                          </DropdownMenuRadioItem>
+                        ))}
+                      </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </FormControl>
+              )}
 
               <FormMessage />
             </FormItem>

@@ -16,6 +16,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { toStoredPhoneNumberFormat } from "@/lib/utils";
 
 const RegisterFormSchema = z
   .object({
@@ -34,7 +35,7 @@ const RegisterFormSchema = z
       return z.NEVER;
     }
 
-    return { ...rest, phone_number: phoneNumber.format("E.164") };
+    return { ...rest, phone_number: toStoredPhoneNumberFormat(phone_number) };
   });
 
 export type RegistrationSuccessHandler = ({

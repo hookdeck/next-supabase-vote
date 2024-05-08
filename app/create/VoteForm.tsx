@@ -24,7 +24,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import { cn, nextWeek } from "@/lib/utils";
+import {
+  cn,
+  nextWeek,
+  toDisplayedPhoneNumberFormat,
+  toStoredPhoneNumberFormat,
+} from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "../../components/ui/calendar";
 import { createVote } from "@/lib/actions/vote";
@@ -37,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { IVoteOptions } from "@/lib/types";
 
 const FormSchema = z
   .object({
@@ -58,7 +63,7 @@ const FormSchema = z
       const vote_options = [...new Set([...data.vote_options])];
       return vote_options.length === data.vote_options.length;
     },
-    { message: "Vote option need to be uniqe", path: ["vote_options"] }
+    { message: "Vote option need to be unique", path: ["vote_options"] }
   );
 
 type FormattedNumber = {
@@ -105,10 +110,9 @@ export default function VoteForm() {
       const availableNumbers = configuredPhoneNumbers
         .filter((tel) => !usedPhoneNumbers.includes(tel))
         .map((tel) => {
-          const parsedNumber = parsePhoneNumber(tel);
           return {
-            e164: parsedNumber.format("E.164"),
-            displayNumber: parsedNumber.formatInternational(),
+            e164: toStoredPhoneNumberFormat(tel),
+            displayNumber: toDisplayedPhoneNumberFormat(tel),
           };
         });
 
@@ -143,9 +147,12 @@ export default function VoteForm() {
   }
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const vote_options: { [key: string]: number } = {};
-    data.vote_options.forEach((option) => {
-      vote_options[option] = 0;
+    const vote_options: IVoteOptions = {};
+    data.vote_options.forEach((option, index) => {
+      vote_options[option] = {
+        position: index,
+        vote_count: 0,
+      };
     });
     const insertData = { ...data, vote_options };
     toast.promise(createVote(insertData), {
@@ -371,4 +378,7 @@ export default function VoteForm() {
       </form>
     </Form>
   );
+}
+function toE164(tel: string): any {
+  throw new Error("Function not implemented.");
 }

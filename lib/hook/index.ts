@@ -1,59 +1,60 @@
 import { useQuery } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
-import { sortObject } from "../utils";
-import { IComment } from "../types";
+import { sortVoteOptions } from "../utils";
+import { IComment, IVoteOption, IVoteOptions } from "../types";
+import { Json } from "../types/supabase";
 
 export function useGetVote(id: string) {
-	const supabase = createSupabaseBrowser();
+  const supabase = createSupabaseBrowser();
 
-	return useQuery({
-		queryKey: ["vote-" + id],
-		queryFn: async () => {
-			const { data } = await supabase
-				.from("vote")
-				.select("*,vote_options(*),vote_log(*)")
-				.eq("id", id)
-				.single();
+  return useQuery({
+    queryKey: ["vote-" + id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("vote")
+        .select("*,vote_options(*),vote_log(*)")
+        .eq("id", id)
+        .single();
 
-			const voteOptions = sortObject(
-				data?.vote_options?.options as { [key: string]: number }
-			);
-			const totalVote = Object.values(voteOptions).reduce(
-				(acc, value) => acc + value,
-				0
-			);
+      const voteOptions = sortVoteOptions(
+        data?.vote_options?.options as any,
+      );
+      const totalVote = Object.values(voteOptions).reduce(
+        (acc, value) => acc + value.vote_count,
+        0,
+      );
 
-			return {
-				voteOptions,
-				totalVote,
-				voteLog: data?.vote_log[0],
-				isExpired: data?.end_date! < new Date().toISOString(),
-			};
-		},
-		staleTime: Infinity,
-	});
+      return {
+        voteOptions,
+        totalVote,
+        voteLog: data?.vote_log[0],
+        isExpired: data?.end_date! < new Date().toISOString(),
+      };
+    },
+    staleTime: Infinity,
+  });
 }
 
 export function useUser() {
-	const supabase = createSupabaseBrowser();
-	return useQuery({
-		queryKey: ["user"],
-		queryFn: async () => {
-			const { data } = await supabase.auth.getSession();
-			return { user: data.session?.user };
-		},
-		staleTime: Infinity,
-	});
+  const supabase = createSupabaseBrowser();
+  return useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const { data } = await supabase.auth.getSession();
+      return { user: data.session?.user };
+    },
+    staleTime: Infinity,
+  });
 }
 
 export function useComment(voteId: string) {
-	const supabase = createSupabaseBrowser();
+  const supabase = createSupabaseBrowser();
 
-	return useQuery({
-		queryKey: ["vote-comment-" + voteId],
-		queryFn: async () => {
-			return [] as IComment[];
-		},
-		staleTime: Infinity,
-	});
+  return useQuery({
+    queryKey: ["vote-comment-" + voteId],
+    queryFn: async () => {
+      return [] as IComment[];
+    },
+    staleTime: Infinity,
+  });
 }

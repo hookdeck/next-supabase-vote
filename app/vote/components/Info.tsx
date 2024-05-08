@@ -2,7 +2,7 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { IVote } from "@/lib/types";
-import parsePhoneNumber from "libphonenumber-js";
+import { toDisplayedPhoneNumberFormat } from "@/lib/utils";
 
 const TimeCountDown = dynamic(() => import("./TimeCountDown"), { ssr: false });
 
@@ -19,7 +19,7 @@ export default function Info({ vote }: { vote: IVote }) {
           Vote by sending an SMS:{" "}
           <span className="bg-zinc-600 p-1">#choice</span> to{" "}
           <span className="font-extrabold">
-            {parsePhoneNumber(vote.phone_number)?.formatInternational()}
+            {toDisplayedPhoneNumberFormat(vote.phone_number)}
           </span>
         </div>
       )}

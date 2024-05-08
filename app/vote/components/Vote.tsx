@@ -9,6 +9,7 @@ import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useGetVote } from "@/lib/hook";
 import VoteLoading from "./VoteLoading";
 import { useQueryClient } from "@tanstack/react-query";
+import { IVoteOption } from "@/lib/types";
 
 export default function Vote({ id }: { id: string }) {
   const supabase = createSupabaseBrowser();
@@ -43,7 +44,7 @@ export default function Vote({ id }: { id: string }) {
   const totalVote = useMemo(() => {
     if (data?.voteOptions) {
       return Object.values(data.voteOptions).reduce(
-        (acc, value) => acc + value,
+        (acc, option) => acc + option.vote_count,
         0
       );
     }
@@ -96,7 +97,7 @@ export default function Vote({ id }: { id: string }) {
       <div>
         {Object.keys(voteOptions).map((key, index) => {
           const percentage = Math.round(
-            (voteOptions[key as keyof typeof voteOptions] * 100) / totalVote!
+            (voteOptions[key].vote_count * 100) / totalVote!
           );
           return (
             <div
@@ -122,7 +123,7 @@ export default function Vote({ id }: { id: string }) {
                     }}
                   >
                     <h1 className=" absolute top-1/2 -right-8  -translate-y-1/2 select-none">
-                      {voteOptions[key as keyof typeof voteOptions]}
+                      {voteOptions[key].vote_count}
                     </h1>
                   </div>
                 </div>

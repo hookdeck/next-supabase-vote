@@ -51,28 +51,37 @@ export type Database = {
           },
         ]
       }
-      users: {
+      profile: {
         Row: {
           avatar_url: string | null
           created_at: string
+          email: string | null
+          full_name: string | null
           id: string
-          user_name: string | null
+          phone: string | null
+          updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id: string
-          user_name?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
-          user_name?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "users_id_fkey"
+            foreignKeyName: "profile_id_fkey"
             columns: ["id"]
             isOneToOne: true
             referencedRelation: "users"

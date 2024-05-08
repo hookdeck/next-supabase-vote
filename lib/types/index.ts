@@ -47,3 +47,12 @@ export type IComment = {
     user_name: string | null;
   } | null;
 };
+
+export interface IVoteOption {
+  position: number;
+  vote_count: number;
+}
+
+export interface IVoteOptions {
+  [key: string]: IVoteOption;
+}

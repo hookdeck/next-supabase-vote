@@ -2,8 +2,9 @@
 
 import { redirect } from "next/navigation";
 import createSupabaseServer from "../supabase/server";
-import { Json } from "../types/supabase";
 import { revalidatePath } from "next/cache";
+import { IVoteOptions } from "../types";
+import { Json } from "../types/supabase";
 
 export async function listActiveVotes() {
   const supabase = await createSupabaseServer();
@@ -26,7 +27,7 @@ export async function listExpiredVotes() {
 }
 
 export async function createVote(data: {
-  vote_options: Json;
+  vote_options: IVoteOptions;
   end_date: Date;
   title: string;
   description?: string;
@@ -35,7 +36,7 @@ export async function createVote(data: {
   const supabase = await createSupabaseServer();
 
   const { data: voteId, error } = await supabase.rpc("create_vote", {
-    options: data.vote_options,
+    options: data.vote_options as any,
     title: data.title,
     end_date: new Date(data.end_date).toISOString(),
     description: data.description || "",

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@hookdeck/sdk/webhooks/helpers";
 import { toStoredPhoneNumberFormat } from "@/lib/utils";
 import createSupabaseServerAdmin from "@/lib/supabase/admin";
+import { IVoteOptions } from "@/lib/types";
+import { createSigner } from "fast-jwt";
+import { createClient } from "@supabase/supabase-js";
 
 interface TwilioMessagingBody {
   ToCountry: string;
@@ -23,6 +26,24 @@ interface TwilioMessagingBody {
   AccountSid: string;
   From: string;
   ApiVersion: string;
+}
+
+const signer = createSigner({
+  key: process.env.SUPABASE_JWT_SECRET,
+  algorithm: "HS256",
+});
+
+export function createSupabaseToken(userEmail: string, userId: string) {
+  const ONE_HOUR = 60 * 60;
+  const exp = Math.round(Date.now() / 1000) + ONE_HOUR;
+  const payload = {
+    aud: "authenticated",
+    exp,
+    sub: userId,
+    email: userEmail,
+    role: "authenticated",
+  };
+  return signer(payload);
 }
 
 export async function POST(request: Request) {
@@ -74,10 +95,26 @@ export async function POST(request: Request) {
 
   console.log("Found profile", voter);
 
+  const token = createSupabaseToken(
+    voter.email as string,
+    voter.id,
+  );
+
+  const authenticatedClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    },
+  );
+  // can be used normally with RLS!
+  const user = await authenticatedClient.auth.getUser();
+  console.log("Mapped to user", user);
+
   // 2. Check which poll is associated with the "to" phone number
   const voteNumber = toStoredPhoneNumberFormat(body.To);
 
-  const { data: voterPoll, error: voteError } = await supabase
+  const { data: voterPoll, error: voteError } = await authenticatedClient
     .from("vote")
     .select("*")
     .eq("phone_number", voteNumber)
@@ -93,14 +130,15 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log("found voterPoll", voterPoll);
+  console.log("Found voterPoll", voterPoll);
 
   // 3. Validate the vote option
-  const { data: voteOptions, error: voteOptionsError } = await supabase
-    .from("vote_options")
-    .select("options")
-    .eq("vote_id", voterPoll.id)
-    .single();
+  const { data: voteOptions, error: voteOptionsError } =
+    await authenticatedClient
+      .from("vote_options")
+      .select("options")
+      .eq("vote_id", voterPoll.id)
+      .single();
 
   if (voteOptionsError) {
     console.error(voteOptionsError);
@@ -114,10 +152,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const options = voteOptions.options as VoteOptions;
+  const options = voteOptions.options as unknown as IVoteOptions;
   const votedForOption = body.Body.trim().replace("#", "");
 
-  if (!options || !options[votedForOption]) {
+  console.log("options", options);
+
+  let selectedOptionText = null;
+  const optionKeys = Object.keys(options);
+  for (let i = 0; i < optionKeys.length; ++i) {
+    const key = optionKeys[i];
+    if (Number(options[key].position) === Number(votedForOption)) {
+      console.log("Found matching option", key, options[key]);
+      selectedOptionText = key;
+      break;
+    }
+  }
+
+  if (!options || !selectedOptionText) {
     return new NextResponse(
       JSON.stringify({
         error:
@@ -128,20 +179,25 @@ export async function POST(request: Request) {
   }
 
   // 4. Add the user's vote to the poll
-  const { error } = await supabase.rpc("update_vote", {
+  const { error, data } = await authenticatedClient.rpc("update_vote", {
     update_id: voterPoll.id,
-    option: votedForOption,
+    option: selectedOptionText,
   });
 
   if (error) {
+    const errorMessage =
+      `Error: could not update the vote: "${votedForOption}" for poll with id "${voterPoll.id}"`;
+    console.error(errorMessage, error);
+
     return new NextResponse(
       JSON.stringify({
-        error:
-          `Error: could not update the vote: "${votedForOption}" for poll with id "${voterPoll.id}"`,
+        error: errorMessage,
       }),
       { status: 500 },
     );
   }
+
+  console.log("Updated vote", data);
 
   return NextResponse.json({ vote_success: true });
 }

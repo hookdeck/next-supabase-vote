@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
 import {
   sortVoteOptions,
@@ -66,7 +66,14 @@ const configuredPhoneNumbers = process.env.NEXT_PUBLIC_PHONE_NUMBERS
   ? process.env.NEXT_PUBLIC_PHONE_NUMBERS.split(",")
   : [];
 
-export function useAvailablePhoneNumbers() {
+export type FormattedNumber = {
+  e164: string;
+  displayNumber: string;
+};
+
+export function useAvailablePhoneNumbers(): UseQueryResult<
+  FormattedNumber[]
+> {
   const supabase = createSupabaseBrowser();
 
   return useQuery({
@@ -80,7 +87,7 @@ export function useAvailablePhoneNumbers() {
 
       if (error) {
         console.error(error);
-        return;
+        throw new Error("Failed to fetch phone numbers");
       }
       const usedPhoneNumbers = data.map((number) => number.phone_number);
       const availableNumbers = configuredPhoneNumbers

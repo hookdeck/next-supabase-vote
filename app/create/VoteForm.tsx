@@ -15,7 +15,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "../../components/ui/input";
 import { CalendarIcon, TrashIcon } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
@@ -62,13 +62,7 @@ const FormSchema = z
     { message: "Vote option need to be unique", path: ["vote_options"] }
   );
 
-type FormattedNumber = {
-  e164: string;
-  displayNumber: string;
-};
-
 export default function VoteForm() {
-  const supabase = createSupabaseBrowser();
   const optionRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const [options, setOptions] = useState<{ id: string; label: string }[]>([]);

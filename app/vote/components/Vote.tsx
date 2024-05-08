@@ -1,6 +1,11 @@
 "use client";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import { cn, getHightValueObjectKey } from "@/lib/utils";
+import {
+  cn,
+  getHightValueObjectKey,
+  sortVoteOptions,
+  sortVoteOptionsBy,
+} from "@/lib/utils";
 import { redirect } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -9,7 +14,7 @@ import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { useGetVote } from "@/lib/hook";
 import VoteLoading from "./VoteLoading";
 import { useQueryClient } from "@tanstack/react-query";
-import { IVoteOption } from "@/lib/types";
+import { IVoteOptions } from "@/lib/types";
 
 export default function Vote({ id }: { id: string }) {
   const supabase = createSupabaseBrowser();
@@ -30,11 +35,12 @@ export default function Vote({ id }: { id: string }) {
         (payload) => {
           queryClient.setQueryData(["vote-" + id], (currentVote: any) => ({
             ...currentVote,
-            voteOptions: payload.new.options,
+            voteOptions: sortVoteOptionsBy(payload.new.options, "vote_count"),
           }));
         }
       )
       .subscribe();
+
     return () => {
       channel.unsubscribe();
     };
@@ -43,7 +49,7 @@ export default function Vote({ id }: { id: string }) {
 
   const totalVote = useMemo(() => {
     if (data?.voteOptions) {
-      return Object.values(data.voteOptions).reduce(
+      return Object.values(data.voteOptions as IVoteOptions).reduce(
         (acc, option) => acc + option.vote_count,
         0
       );
@@ -64,6 +70,7 @@ export default function Vote({ id }: { id: string }) {
   }
 
   const { voteLog, voteOptions, isExpired } = data;
+  const sortedVoteOptions = sortVoteOptionsBy(voteOptions, "vote_count");
 
   const rpcUpdateVote = async (option: string) => {
     let { error } = await supabase.rpc("update_vote", {
@@ -95,9 +102,9 @@ export default function Vote({ id }: { id: string }) {
   return (
     <div className="space-y-10">
       <div>
-        {Object.keys(voteOptions).map((key, index) => {
+        {Object.keys(sortedVoteOptions).map((key, index) => {
           const percentage = Math.round(
-            (voteOptions[key].vote_count * 100) / totalVote!
+            (sortedVoteOptions[key].vote_count * 100) / totalVote!
           );
           return (
             <div
@@ -106,7 +113,9 @@ export default function Vote({ id }: { id: string }) {
               onClick={() => castVote(key)}
             >
               <h2 className=" w-40 line-clamp-2   text-lg break-words select-none ">
-                <span className="mr-2 bg-zinc-600 p-1">#{index}</span>
+                <span className="mr-2 bg-zinc-600 p-1">
+                  #{sortedVoteOptions[key].position}
+                </span>
                 {highestKey === key ? "🎉" + key : key}
               </h2>
               <div className="flex-1 flex items-center gap-2">
@@ -123,7 +132,7 @@ export default function Vote({ id }: { id: string }) {
                     }}
                   >
                     <h1 className=" absolute top-1/2 -right-8  -translate-y-1/2 select-none">
-                      {voteOptions[key].vote_count}
+                      {sortedVoteOptions[key].vote_count}
                     </h1>
                   </div>
                 </div>

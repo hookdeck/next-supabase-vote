@@ -1,8 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { parsePhoneNumber } from "libphonenumber-js";
 import { twMerge } from "tailwind-merge";
-import { IVoteOption, IVoteOptions } from "./types";
-import { Json } from "./types/supabase";
+import { IVoteOptions } from "./types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,9 +13,16 @@ export function nextWeek() {
   return nextWeekDate;
 }
 
-export function sortVoteOptions(object: IVoteOptions) {
+export function sortVoteOptionsBy(
+  object: IVoteOptions,
+  sortBy: "position" | "vote_count" = "position",
+) {
   const sortedKeys = Object.keys(object).sort((a, b) => {
-    return object[a].position - object[b].position;
+    if (sortBy === "position") {
+      return object[a].position - object[b].position;
+    } else {
+      return object[b].vote_count - object[a].vote_count;
+    }
   });
 
   // Create a new object with sorted keys
@@ -38,6 +44,7 @@ export function getHightValueObjectKey(object: IVoteOptions) {
       hightKey = "";
     }
   }
+  console.log({ hightKey });
   return hightKey;
 }
 

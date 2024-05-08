@@ -84,10 +84,13 @@ export async function POST(request: Request) {
     .single();
 
   if (profileError) {
+    const errorMessage =
+      "Error: could not find a user with the provided 'from' phone number";
+    console.error(errorMessage, profileError);
+
     return new NextResponse(
       JSON.stringify({
-        error:
-          "Error: could not find a user with the provided 'from' phone number",
+        error: errorMessage,
       }),
       { status: 404 },
     );

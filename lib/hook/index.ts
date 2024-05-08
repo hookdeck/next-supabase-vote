@@ -1,7 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
 import {
-  sortVoteOptions,
+  sortVoteOptionsBy,
   toDisplayedPhoneNumberFormat,
   toStoredPhoneNumberFormat,
 } from "../utils";
@@ -19,7 +19,7 @@ export function useGetVote(id: string) {
         .eq("id", id)
         .single();
 
-      const voteOptions = sortVoteOptions(
+      const voteOptions = sortVoteOptionsBy(
         data?.vote_options?.options as any,
       );
       const totalVote = Object.values(voteOptions).reduce(

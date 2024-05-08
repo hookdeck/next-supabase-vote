@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
-import { sortVoteOptions } from "../utils";
-import { IComment, IVoteOption, IVoteOptions } from "../types";
-import { Json } from "../types/supabase";
+import {
+  sortVoteOptions,
+  toDisplayedPhoneNumberFormat,
+  toStoredPhoneNumberFormat,
+} from "../utils";
+import { IComment } from "../types";
 
 export function useGetVote(id: string) {
   const supabase = createSupabaseBrowser();
@@ -54,6 +57,42 @@ export function useComment(voteId: string) {
     queryKey: ["vote-comment-" + voteId],
     queryFn: async () => {
       return [] as IComment[];
+    },
+    staleTime: Infinity,
+  });
+}
+
+const configuredPhoneNumbers = process.env.NEXT_PUBLIC_PHONE_NUMBERS
+  ? process.env.NEXT_PUBLIC_PHONE_NUMBERS.split(",")
+  : [];
+
+export function useAvailablePhoneNumbers() {
+  const supabase = createSupabaseBrowser();
+
+  return useQuery({
+    queryKey: ["available-phone-numbers"],
+    queryFn: async () => {
+      // Get phone numbers used in all active polls
+      const { error, data } = await supabase
+        .from("vote")
+        .select("phone_number")
+        .filter("end_date", "gte", new Date().toISOString());
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      const usedPhoneNumbers = data.map((number) => number.phone_number);
+      const availableNumbers = configuredPhoneNumbers
+        .filter((tel) => !usedPhoneNumbers.includes(tel))
+        .map((tel) => {
+          return {
+            e164: toStoredPhoneNumberFormat(tel),
+            displayNumber: toDisplayedPhoneNumberFormat(tel),
+          };
+        });
+
+      return availableNumbers;
     },
     staleTime: Infinity,
   });

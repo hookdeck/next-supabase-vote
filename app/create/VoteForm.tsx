@@ -24,12 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "../../components/ui/popover";
-import {
-  cn,
-  nextWeek,
-  toDisplayedPhoneNumberFormat,
-  toStoredPhoneNumberFormat,
-} from "@/lib/utils";
+import { cn, nextWeek } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar } from "../../components/ui/calendar";
 import { createVote } from "@/lib/actions/vote";
@@ -43,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { IVoteOptions } from "@/lib/types";
+import { useAvailablePhoneNumbers } from "@/lib/hook";
 
 const FormSchema = z
   .object({
@@ -87,40 +83,7 @@ export default function VoteForm() {
     },
   });
 
-  const [availablePhoneNumbers, setAvailablePhoneNumbers] = useState<
-    FormattedNumber[]
-  >([]);
-  useEffect(() => {
-    const configuredPhoneNumbers = process.env.NEXT_PUBLIC_PHONE_NUMBERS
-      ? process.env.NEXT_PUBLIC_PHONE_NUMBERS.split(",")
-      : [];
-
-    const getPhoneNumbers = async () => {
-      // Get phone numbers used in all active polls
-      const { error, data } = await supabase
-        .from("vote")
-        .select("phone_number")
-        .filter("end_date", "gte", new Date().toISOString());
-
-      if (error) {
-        console.error(error);
-        return;
-      }
-      const usedPhoneNumbers = data.map((number) => number.phone_number);
-      const availableNumbers = configuredPhoneNumbers
-        .filter((tel) => !usedPhoneNumbers.includes(tel))
-        .map((tel) => {
-          return {
-            e164: toStoredPhoneNumberFormat(tel),
-            displayNumber: toDisplayedPhoneNumberFormat(tel),
-          };
-        });
-
-      setAvailablePhoneNumbers(availableNumbers);
-    };
-
-    getPhoneNumbers();
-  }, [supabase]);
+  const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
 
   function addOptions() {
     const optionValue = optionRef.current.value.trim();
@@ -319,7 +282,7 @@ export default function VoteForm() {
           render={({ field }) => (
             <FormItem className="flex flex-col items-start">
               <FormLabel>Vote by Phone Number</FormLabel>
-              {availablePhoneNumbers.length == 0 ? (
+              {availablePhoneNumbers && availablePhoneNumbers.length == 0 ? (
                 <FormDescription>No numbers available</FormDescription>
               ) : (
                 <FormControl>
@@ -343,20 +306,22 @@ export default function VoteForm() {
                         }}
                       >
                         <DropdownMenuRadioItem value="">
-                          {availablePhoneNumbers.length == 0 ? (
+                          {availablePhoneNumbers &&
+                          availablePhoneNumbers.length == 0 ? (
                             <span>No numbers available</span>
                           ) : (
                             <span>Not enabled</span>
                           )}
                         </DropdownMenuRadioItem>
-                        {availablePhoneNumbers.map((number) => (
-                          <DropdownMenuRadioItem
-                            key={number.e164}
-                            value={number.e164}
-                          >
-                            {number.displayNumber}
-                          </DropdownMenuRadioItem>
-                        ))}
+                        {availablePhoneNumbers &&
+                          availablePhoneNumbers.map((number) => (
+                            <DropdownMenuRadioItem
+                              key={number.e164}
+                              value={number.e164}
+                            >
+                              {number.displayNumber}
+                            </DropdownMenuRadioItem>
+                          ))}
                       </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>

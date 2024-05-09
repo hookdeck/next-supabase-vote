@@ -1,11 +1,6 @@
 "use client";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import {
-  cn,
-  getHightValueObjectKey,
-  sortVoteOptions,
-  sortVoteOptionsBy,
-} from "@/lib/utils";
+import { cn, getHighestVotedObjectKey, sortVoteOptionsBy } from "@/lib/utils";
 import { redirect } from "next/navigation";
 import React, { useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -57,7 +52,7 @@ export default function Vote({ id }: { id: string }) {
   }, [data?.voteOptions]);
   const highestKey = useMemo(() => {
     if (data?.voteOptions) {
-      return getHightValueObjectKey(data?.voteOptions);
+      return getHighestVotedObjectKey(data?.voteOptions);
     }
   }, [data?.voteOptions]);
 

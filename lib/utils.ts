@@ -33,19 +33,18 @@ export function sortVoteOptionsBy(
   return sortedVote;
 }
 
-export function getHightValueObjectKey(object: IVoteOptions) {
+export function getHighestVotedObjectKey(object: IVoteOptions) {
   let maxValue = -Infinity;
-  let hightKey = "";
+  let highestKey = "";
   for (const [key, value] of Object.entries(object)) {
     if (value.vote_count > maxValue) {
-      hightKey = key;
+      highestKey = key;
       maxValue = value.vote_count;
     } else if (value.vote_count === maxValue) {
-      hightKey = "";
+      highestKey = "";
     }
   }
-  console.log({ hightKey });
-  return hightKey;
+  return highestKey;
 }
 
 export function getFromAndTo(page: number, itemPerPage = 3) {

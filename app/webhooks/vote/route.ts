@@ -5,6 +5,12 @@ import createSupabaseServerAdmin from "@/lib/supabase/admin";
 import { IVoteOptions } from "@/lib/types";
 import { createSigner } from "fast-jwt";
 import { createClient } from "@supabase/supabase-js";
+import { Twilio } from "twilio";
+
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
+
+const twilioClient = new Twilio(twilioAccountSid, twilioAuthToken);
 
 interface TwilioMessagingBody {
   ToCountry: string;
@@ -201,6 +207,12 @@ export async function POST(request: Request) {
   }
 
   console.log("Updated vote", data);
+
+  await twilioClient.messages.create({
+    to: body.From,
+    from: body.To,
+    body: `Thanks for your vote for ${selectedOptionText} 🎉`,
+  });
 
   return NextResponse.json({ vote_success: true });
 }

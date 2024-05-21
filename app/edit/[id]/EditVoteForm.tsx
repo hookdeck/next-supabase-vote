@@ -18,12 +18,7 @@ import {
 import { CalendarIcon } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
 
-import {
-  cn,
-  nextWeek,
-  toDisplayedPhoneNumberFormat,
-  toStoredPhoneNumberFormat,
-} from "@/lib/utils";
+import { cn, nextWeek } from "@/lib/utils";
 import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
@@ -38,21 +33,11 @@ import { updateVoteById } from "@/lib/actions/vote";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAvailablePhoneNumbers } from "@/lib/hook";
-import { useState } from "react";
 
 const FormSchema = z.object({
   title: z.string().min(5, { message: "Title has a minimum characters of 5" }),
   end_date: z.date(),
   description: z.string().optional(),
-  phone_number: z.string(),
 });
 
 export default function EditVoteForm({ vote }: { vote: IVote }) {
@@ -63,7 +48,6 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
       title: vote.title,
       end_date: new Date(vote.end_date),
       description: vote.description || "",
-      phone_number: vote.phone_number || "",
     },
   });
 
@@ -72,23 +56,6 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
       loading: "update...",
       success: "Successfully update",
       error: (err) => "Fail to update vote. " + err.toString(),
-    });
-  }
-
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
-  const doesNotContainVoteNumber =
-    availablePhoneNumbers &&
-    vote.phone_number &&
-    availablePhoneNumbers.filter(
-      (number) =>
-        number.e164 === toStoredPhoneNumberFormat(vote.phone_number as string)
-    ).length === 0;
-
-  if (availablePhoneNumbers && vote.phone_number && doesNotContainVoteNumber) {
-    availablePhoneNumbers.push({
-      e164: toStoredPhoneNumberFormat(vote.phone_number),
-      displayNumber: toDisplayedPhoneNumberFormat(vote.phone_number),
     });
   }
 
@@ -175,63 +142,6 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
                   />
                 </PopoverContent>
               </Popover>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start">
-              <FormLabel>Vote by Phone Number</FormLabel>
-              {availablePhoneNumbers && availablePhoneNumbers.length == 0 ? (
-                <FormDescription>No numbers available</FormDescription>
-              ) : (
-                <FormControl>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal justify-start"
-                        )}
-                      >
-                        {field.value || "Not enabled"}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuRadioGroup
-                        value={phoneNumber}
-                        onValueChange={(value) => {
-                          setPhoneNumber(value);
-                          field.onChange(value);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="">
-                          {availablePhoneNumbers &&
-                          availablePhoneNumbers.length == 0 ? (
-                            <span>No numbers available</span>
-                          ) : (
-                            <span>Not enabled</span>
-                          )}
-                        </DropdownMenuRadioItem>
-                        {availablePhoneNumbers &&
-                          availablePhoneNumbers.map((number) => (
-                            <DropdownMenuRadioItem
-                              key={number.e164}
-                              value={number.e164}
-                            >
-                              {number.displayNumber}
-                            </DropdownMenuRadioItem>
-                          ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </FormControl>
-              )}
 
               <FormMessage />
             </FormItem>

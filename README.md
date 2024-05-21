@@ -2,7 +2,7 @@
 
 A live poll Next.js application built with Supabase, Twilio, and Hookdeck.
 
-<img width="1299" alt="Screenshot 2023-12-13 at 6 11 26 PM" src="https://github.com/Chensokheng/next-supabase-vote/assets/52232579/614c6d64-80f1-43ee-a5fb-288f27b581da">
+https://github.com/hookdeck/supapoll/assets/328367/991538ac-b43e-498f-a6e7-c9b641035d4e
 
 ## Setup
 

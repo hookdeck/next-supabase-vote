@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text" DEFAULT NULL::"text") RETURNS "uuid"
+CREATE OR REPLACE FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") RETURNS "uuid"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -44,8 +44,8 @@ BEGIN
     RAISE EXCEPTION 'All vote_count in options must be numbers.';
   END IF;
 
-  INSERT INTO vote (created_by, title, end_date, description, phone_number)
-  VALUES (auth.uid(),title, end_date, description, phone_number)
+  INSERT INTO vote (created_by, title, end_date, description)
+  VALUES (auth.uid(),title, end_date, description)
   RETURNING id INTO return_id;
 
   INSERT INTO vote_options (vote_id,options)

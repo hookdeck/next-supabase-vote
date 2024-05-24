@@ -59,7 +59,7 @@ $$;
 
 ALTER FUNCTION "public"."create_user_on_signup"() OWNER TO "postgres";
 
-CREATE OR REPLACE FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text" DEFAULT NULL::"text") RETURNS "uuid"
+CREATE OR REPLACE FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") RETURNS "uuid"
     LANGUAGE "plpgsql" SECURITY DEFINER
     SET "search_path" TO 'public'
     AS $$
@@ -85,8 +85,8 @@ BEGIN
     RAISE EXCEPTION 'All values in options must be numbers.';
   END IF;
 
-  INSERT INTO vote (created_by, title, end_date, description, phone_number)
-  VALUES (auth.uid(),title, end_date, description, phone_number)
+  INSERT INTO vote (created_by, title, end_date, description)
+  VALUES (auth.uid(),title, end_date, description)
   RETURNING id INTO return_id;
 
   INSERT INTO vote_options (vote_id,options)
@@ -94,7 +94,7 @@ BEGIN
   return return_id;
 END $$;
 
-ALTER FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text") OWNER TO "postgres";
+ALTER FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."create_vote_log"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
@@ -122,7 +122,6 @@ CREATE TABLE IF NOT EXISTS "public"."vote" (
     "title" "text" NOT NULL,
     "end_date" timestamp with time zone NOT NULL,
     "description" "text",
-    "phone_number" "text",
     CONSTRAINT "vote_created_at_check" CHECK (("created_at" <= "now"())),
     CONSTRAINT "vote_end_date_check" CHECK ((("end_date" <= ("now"() + '7 days'::interval)) AND ("end_date" > "now"())))
 );
@@ -265,9 +264,6 @@ ALTER TABLE ONLY "public"."vote_options"
     ADD CONSTRAINT "vote_options_pkey" PRIMARY KEY ("vote_id");
 
 ALTER TABLE ONLY "public"."vote"
-    ADD CONSTRAINT "vote_phone_number_key" UNIQUE ("phone_number");
-
-ALTER TABLE ONLY "public"."vote"
     ADD CONSTRAINT "vote_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."vote_log"
@@ -358,9 +354,9 @@ GRANT ALL ON FUNCTION "public"."create_user_on_signup"() TO "anon";
 GRANT ALL ON FUNCTION "public"."create_user_on_signup"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."create_user_on_signup"() TO "service_role";
 
-GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text", "phone_number" "text") TO "service_role";
+GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_vote"("options" "jsonb", "title" "text", "end_date" timestamp without time zone, "description" "text") TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."create_vote_log"() TO "anon";
 GRANT ALL ON FUNCTION "public"."create_vote_log"() TO "authenticated";

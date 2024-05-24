@@ -29,16 +29,7 @@ import { format } from "date-fns";
 import { Calendar } from "../../components/ui/calendar";
 import { createVote } from "@/lib/actions/vote";
 import { Textarea } from "../../components/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { IVoteOptions } from "@/lib/types";
-import { useAvailablePhoneNumbers } from "@/lib/hook";
 
 const FormSchema = z
   .object({
@@ -52,7 +43,6 @@ const FormSchema = z
       .min(5, { message: "Title has a minimum characters of 5" }),
     description: z.string().optional(),
     end_date: z.date(),
-    phone_number: z.string(),
   })
   .refine(
     (data) => {
@@ -66,18 +56,14 @@ export default function VoteForm() {
   const optionRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const [options, setOptions] = useState<{ id: string; label: string }[]>([]);
-  const [phoneNumber, setPhoneNumber] = useState("");
   const form = useForm<z.infer<typeof FormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(FormSchema),
     defaultValues: {
       title: "",
       vote_options: [],
-      phone_number: "",
     },
   });
-
-  const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
 
   function addOptions() {
     const optionValue = optionRef.current.value.trim();
@@ -264,63 +250,6 @@ export default function VoteForm() {
                   />
                 </PopoverContent>
               </Popover>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start">
-              <FormLabel>Vote by Phone Number</FormLabel>
-              {availablePhoneNumbers && availablePhoneNumbers.length == 0 ? (
-                <FormDescription>No numbers available</FormDescription>
-              ) : (
-                <FormControl>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal justify-start"
-                        )}
-                      >
-                        {field.value || "Not enabled"}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuRadioGroup
-                        value={phoneNumber}
-                        onValueChange={(value) => {
-                          setPhoneNumber(value);
-                          field.onChange(value);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="">
-                          {availablePhoneNumbers &&
-                          availablePhoneNumbers.length == 0 ? (
-                            <span>No numbers available</span>
-                          ) : (
-                            <span>Not enabled</span>
-                          )}
-                        </DropdownMenuRadioItem>
-                        {availablePhoneNumbers &&
-                          availablePhoneNumbers.map((number) => (
-                            <DropdownMenuRadioItem
-                              key={number.e164}
-                              value={number.e164}
-                            >
-                              {number.displayNumber}
-                            </DropdownMenuRadioItem>
-                          ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </FormControl>
-              )}
 
               <FormMessage />
             </FormItem>

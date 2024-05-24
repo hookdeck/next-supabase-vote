@@ -31,7 +31,6 @@ export async function createVote(data: {
   end_date: Date;
   title: string;
   description?: string;
-  phone_number: string;
 }) {
   const supabase = await createSupabaseServer();
 
@@ -40,7 +39,6 @@ export async function createVote(data: {
     title: data.title,
     end_date: new Date(data.end_date).toISOString(),
     description: data.description || "",
-    phone_number: data.phone_number || undefined,
   });
 
   if (error) {
@@ -64,7 +62,6 @@ export async function updateVoteById(
     end_date: Date;
     description?: string;
     title: string;
-    phone_number: string;
   },
   voteId: string,
 ) {
@@ -75,7 +72,6 @@ export async function updateVoteById(
       title: data.title,
       end_date: data.end_date.toISOString(),
       description: data.description,
-      phone_number: data.phone_number,
     })
     .eq("id", voteId);
   if (error) {

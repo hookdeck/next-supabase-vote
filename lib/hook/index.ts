@@ -1,10 +1,6 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
-import {
-  sortVoteOptionsBy,
-  toDisplayedPhoneNumberFormat,
-  toStoredPhoneNumberFormat,
-} from "../utils";
+import { sortVoteOptionsBy } from "../utils";
 import { IComment } from "../types";
 
 export function useGetVote(id: string) {

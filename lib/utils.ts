@@ -1,5 +1,4 @@
 import { type ClassValue, clsx } from "clsx";
-import { parsePhoneNumber } from "libphonenumber-js";
 import { twMerge } from "tailwind-merge";
 import { IVoteOptions } from "./types";
 
@@ -56,14 +55,4 @@ export function getFromAndTo(page: number, itemPerPage = 3) {
   }
 
   return { from, to };
-}
-
-export function toStoredPhoneNumberFormat(phoneNumber: string) {
-  const parseNumber = parsePhoneNumber(phoneNumber);
-  return parseNumber.format("E.164");
-}
-
-export function toDisplayedPhoneNumberFormat(phoneNumber: string) {
-  const parseNumber = parsePhoneNumber(phoneNumber);
-  return parseNumber.formatInternational();
 }

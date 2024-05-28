@@ -4,8 +4,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
-import parsePhoneNumber from "libphonenumber-js";
 import {
   Form,
   FormControl,
@@ -16,7 +14,7 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { toStoredPhoneNumberFormat } from "@/lib/utils";
+import { parsePhoneNumber, toStoredPhoneNumberFormat } from "@/lib/utils";
 
 const RegisterFormSchema = z
   .object({
@@ -24,13 +22,22 @@ const RegisterFormSchema = z
   })
   .transform((val, ctx) => {
     const { phone_number, ...rest } = val;
-    const phoneNumber = parsePhoneNumber(phone_number);
+    try {
+      const phoneNumber = parsePhoneNumber(phone_number);
 
-    if (!phoneNumber?.isValid()) {
+      if (!phoneNumber?.isValid()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["phone_number"],
+          message: `is not a phone number`,
+        });
+        return z.NEVER;
+      }
+    } catch (e) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["phone_number"],
-        message: `is not a phone number`,
+        message: `could not be parsed as a phone number`,
       });
       return z.NEVER;
     }
@@ -50,8 +57,6 @@ export type RegisterFormProps = {
 export default function RegisterForm({
   onSuccessfulSubmit,
 }: RegisterFormProps) {
-  const supabase = createSupabaseBrowser();
-
   const registerForm = useForm<z.infer<typeof RegisterFormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(RegisterFormSchema),
@@ -61,15 +66,7 @@ export default function RegisterForm({
   });
 
   async function onRegisterSubmit(data: z.infer<typeof RegisterFormSchema>) {
-    const { data: result, error } = await supabase.auth.updateUser({
-      phone: data.phone_number,
-    });
-
-    if (error) {
-      console.error(error);
-    } else {
-      onSuccessfulSubmit({ phoneNumber: data.phone_number });
-    }
+    onSuccessfulSubmit({ phoneNumber: data.phone_number });
   }
 
   return (

@@ -1,20 +1,3 @@
-export type IVotes =
-  | {
-    created_at: string;
-    created_by: string;
-    end_date: string;
-    id: string;
-    title: string;
-    phone_number?: string | null;
-    // users: {
-    //   avatar_url: string | null;
-    //   created_at: string;
-    //   id: string;
-    //   user_name: string | null;
-    // } | null;
-  }[]
-  | null;
-
 export type IVoteLog = {
   vote_id: string;
   user_id: string;

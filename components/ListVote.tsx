@@ -1,5 +1,5 @@
 import { emojis, rings } from "@/lib/constant";
-import { IVotes } from "@/lib/types";
+import { IVote } from "@/lib/types";
 import Link from "next/link";
 import React from "react";
 // import Image from "next/image";
@@ -9,7 +9,7 @@ export default function ListVote({
   votes,
   isExpire,
 }: {
-  votes: IVotes;
+  votes: IVote[];
   isExpire?: boolean;
 }) {
   return (

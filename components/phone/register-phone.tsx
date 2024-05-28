@@ -29,11 +29,21 @@ export default function RegisterPhone() {
     checkUser();
   }, [supabase.auth]);
 
-  const handleRegisterSubmit: RegistrationSuccessHandler = ({
+  const handleRegisterSubmit: RegistrationSuccessHandler = async ({
     phoneNumber,
   }) => {
     setPhoneNumber(phoneNumber);
-    setStep(VerifySteps.VERIFY);
+
+    const { error } = await supabase.auth.updateUser({
+      phone: phoneNumber,
+    });
+
+    if (error) {
+      console.error(error);
+      setStep(VerifySteps.ERROR);
+    } else {
+      setStep(VerifySteps.VERIFY);
+    }
   };
 
   const handleVerifySubmit: SuccessfulVerificationHandler = () => {

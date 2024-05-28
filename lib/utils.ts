@@ -58,6 +58,8 @@ export function getFromAndTo(page: number, itemPerPage = 3) {
   return { from, to };
 }
 
+export { parsePhoneNumber } from "libphonenumber-js";
+
 export function toStoredPhoneNumberFormat(phoneNumber: string) {
   const parseNumber = parsePhoneNumber(phoneNumber);
   return parseNumber.format("E.164");

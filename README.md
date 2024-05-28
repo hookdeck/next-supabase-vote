@@ -12,7 +12,7 @@ https://github.com/hookdeck/supapoll/assets/328367/991538ac-b43e-498f-a6e7-c9b64
    ```bash
    supabase projects create
    ```
-4. Open the project URL and add the appropriate values to a `.env` file:
+4. Open the project URL and add the appropriate values to a `.env.local` file:
 
    ```
    NEXT_PUBLIC_SUPABASE_URL=

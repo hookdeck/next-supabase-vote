@@ -1,10 +1,6 @@
 "use client";
 
 import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 import {
   Form,
   FormControl,
@@ -15,28 +11,27 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { VerifyMobileOtpParams } from "@supabase/supabase-js";
-import toast from "react-hot-toast";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 const VerifyFormSchema = z.object({ code: z.string() });
 
-export type SuccessfulVerificationHandler = ({
+export type VerificationSubmitHandler = ({
   phoneNumber,
+  code,
 }: {
   phoneNumber: string;
+  code: string;
 }) => void;
+
 export type VerifyFormProps = {
   phoneNumber: string;
-  onVerificationSuccess: SuccessfulVerificationHandler;
+  onSubmit: VerificationSubmitHandler;
 };
 
-export default function VerifyForm({
-  phoneNumber,
-  onVerificationSuccess,
-}: VerifyFormProps) {
-  const [loading, setLoading] = React.useState(false);
-  const supabase = createSupabaseBrowser();
-
+export default function VerifyForm({ phoneNumber, onSubmit }: VerifyFormProps) {
   const verifyForm = useForm<z.infer<typeof VerifyFormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(VerifyFormSchema),
@@ -46,32 +41,7 @@ export default function VerifyForm({
   });
 
   async function onVerifySubmit(data: z.infer<typeof VerifyFormSchema>) {
-    setLoading(true);
-
-    const otpParams: VerifyMobileOtpParams = {
-      phone: phoneNumber,
-      token: data.code,
-      type: "phone_change",
-    };
-
-    const verify = async () => {
-      const { error } = await supabase.auth.verifyOtp(otpParams);
-
-      setLoading(false);
-
-      if (error) {
-        console.error(error);
-        throw error;
-      } else {
-        onVerificationSuccess({ phoneNumber });
-      }
-    };
-
-    toast.promise(verify(), {
-      loading: "Verifying code...",
-      success: "Successfully verified",
-      error: "Fail to verify",
-    });
+    onSubmit({ phoneNumber, code: data.code });
   }
 
   return (
@@ -91,7 +61,6 @@ export default function VerifyForm({
                 <Input
                   placeholder="Enter the verification code you receive via SMS"
                   {...field}
-                  disabled={loading}
                   autoComplete="off"
                 />
               </FormControl>

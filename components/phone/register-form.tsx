@@ -45,18 +45,17 @@ const RegisterFormSchema = z
     return { ...rest, phone_number: toStoredPhoneNumberFormat(phone_number) };
   });
 
-export type RegistrationSuccessHandler = ({
+export type RegistrationSubmitHandler = ({
   phoneNumber,
 }: {
   phoneNumber: string;
 }) => void;
+
 export type RegisterFormProps = {
-  onSuccessfulSubmit: RegistrationSuccessHandler;
+  onSubmit: RegistrationSubmitHandler;
 };
 
-export default function RegisterForm({
-  onSuccessfulSubmit,
-}: RegisterFormProps) {
+export default function RegisterForm({ onSubmit }: RegisterFormProps) {
   const registerForm = useForm<z.infer<typeof RegisterFormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(RegisterFormSchema),
@@ -66,7 +65,7 @@ export default function RegisterForm({
   });
 
   async function onRegisterSubmit(data: z.infer<typeof RegisterFormSchema>) {
-    onSuccessfulSubmit({ phoneNumber: data.phone_number });
+    onSubmit({ phoneNumber: data.phone_number });
   }
 
   return (

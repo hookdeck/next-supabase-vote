@@ -2,11 +2,12 @@
 
 import React, { useEffect } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
-import RegisterForm, { RegistrationSuccessHandler } from "./register-form";
-import VerifyForm, { SuccessfulVerificationHandler } from "./verify-form";
+import RegisterForm, { RegistrationSubmitHandler } from "./register-form";
+import VerifyForm, { VerificationSubmitHandler } from "./verify-form";
 import { Alert, AlertTitle } from "../ui/alert";
 import { AlertCircle } from "lucide-react";
-import { User } from "@supabase/supabase-js";
+import { User, VerifyMobileOtpParams } from "@supabase/supabase-js";
+import toast from "react-hot-toast";
 
 enum VerifySteps {
   REGISTER,
@@ -29,7 +30,7 @@ export default function RegisterPhone() {
     checkUser();
   }, [supabase.auth]);
 
-  const handleRegisterSubmit: RegistrationSuccessHandler = async ({
+  const handleRegisterSubmit: RegistrationSubmitHandler = async ({
     phoneNumber,
   }) => {
     setPhoneNumber(phoneNumber);
@@ -46,8 +47,32 @@ export default function RegisterPhone() {
     }
   };
 
-  const handleVerifySubmit: SuccessfulVerificationHandler = () => {
-    setStep(VerifySteps.SUCCESS);
+  const handleVerifySubmit: VerificationSubmitHandler = ({
+    phoneNumber,
+    code,
+  }) => {
+    const otpParams: VerifyMobileOtpParams = {
+      phone: phoneNumber!,
+      token: code,
+      type: "phone_change",
+    };
+
+    const verify = async () => {
+      const { error } = await supabase.auth.verifyOtp(otpParams);
+
+      if (error) {
+        console.error(error);
+        setStep(VerifySteps.ERROR);
+      } else {
+        setStep(VerifySteps.SUCCESS);
+      }
+    };
+
+    toast.promise(verify(), {
+      loading: "Verifying code...",
+      success: "Successfully verified",
+      error: "Fail to verify",
+    });
   };
 
   const displayPrompt = user && !user.phone && step !== VerifySteps.SUCCESS;
@@ -61,12 +86,12 @@ export default function RegisterPhone() {
             Register your phone number to vote via SMS
           </AlertTitle>
           {step === VerifySteps.REGISTER && (
-            <RegisterForm onSuccessfulSubmit={handleRegisterSubmit} />
+            <RegisterForm onSubmit={handleRegisterSubmit} />
           )}
           {step === VerifySteps.VERIFY && (
             <VerifyForm
               phoneNumber={phoneNumber!}
-              onVerificationSuccess={handleVerifySubmit}
+              onSubmit={handleVerifySubmit}
             />
           )}
           {step === VerifySteps.ERROR && <span>Something went wrong</span>}

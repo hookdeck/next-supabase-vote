@@ -29,16 +29,10 @@ import { format } from "date-fns";
 import { Calendar } from "../../components/ui/calendar";
 import { createVote } from "@/lib/actions/vote";
 import { Textarea } from "../../components/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { IVoteOptions } from "@/lib/types";
+
 import { useAvailablePhoneNumbers } from "@/lib/hook";
+import PhoneNumberDropdown from "@/components/phone/phone-number-dropdown";
 
 const FormSchema = z
   .object({
@@ -270,61 +264,11 @@ export default function VoteForm() {
           )}
         />
 
-        <FormField
+        <PhoneNumberDropdown
           control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start">
-              <FormLabel>Vote by Phone Number</FormLabel>
-              {availablePhoneNumbers && availablePhoneNumbers.length == 0 ? (
-                <FormDescription>No numbers available</FormDescription>
-              ) : (
-                <FormControl>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal justify-start"
-                        )}
-                      >
-                        {field.value || "Not enabled"}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuRadioGroup
-                        value={phoneNumber}
-                        onValueChange={(value) => {
-                          setPhoneNumber(value);
-                          field.onChange(value);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="">
-                          {availablePhoneNumbers &&
-                          availablePhoneNumbers.length == 0 ? (
-                            <span>No numbers available</span>
-                          ) : (
-                            <span>Not enabled</span>
-                          )}
-                        </DropdownMenuRadioItem>
-                        {availablePhoneNumbers &&
-                          availablePhoneNumbers.map((number) => (
-                            <DropdownMenuRadioItem
-                              key={number.e164}
-                              value={number.e164}
-                            >
-                              {number.displayNumber}
-                            </DropdownMenuRadioItem>
-                          ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </FormControl>
-              )}
-
-              <FormMessage />
-            </FormItem>
-          )}
+          selectedPhoneNumber={phoneNumber}
+          phoneNumbers={availablePhoneNumbers}
+          phoneNumberChanged={(value) => setPhoneNumber(value)}
         />
 
         <Button

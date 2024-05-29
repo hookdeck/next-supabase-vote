@@ -38,15 +38,9 @@ import { updateVoteById } from "@/lib/actions/vote";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAvailablePhoneNumbers } from "@/lib/hook";
 import { useState } from "react";
+import { useAvailablePhoneNumbers } from "@/lib/hook";
+import PhoneNumberDropdown from "@/components/phone/phone-number-dropdown";
 
 const FormSchema = z.object({
   title: z.string().min(5, { message: "Title has a minimum characters of 5" }),
@@ -181,61 +175,11 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
           )}
         />
 
-        <FormField
+        <PhoneNumberDropdown
           control={form.control}
-          name="phone_number"
-          render={({ field }) => (
-            <FormItem className="flex flex-col items-start">
-              <FormLabel>Vote by Phone Number</FormLabel>
-              {availablePhoneNumbers && availablePhoneNumbers.length == 0 ? (
-                <FormDescription>No numbers available</FormDescription>
-              ) : (
-                <FormControl>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal justify-start"
-                        )}
-                      >
-                        {field.value || "Not enabled"}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <DropdownMenuRadioGroup
-                        value={phoneNumber}
-                        onValueChange={(value) => {
-                          setPhoneNumber(value);
-                          field.onChange(value);
-                        }}
-                      >
-                        <DropdownMenuRadioItem value="">
-                          {availablePhoneNumbers &&
-                          availablePhoneNumbers.length == 0 ? (
-                            <span>No numbers available</span>
-                          ) : (
-                            <span>Not enabled</span>
-                          )}
-                        </DropdownMenuRadioItem>
-                        {availablePhoneNumbers &&
-                          availablePhoneNumbers.map((number) => (
-                            <DropdownMenuRadioItem
-                              key={number.e164}
-                              value={number.e164}
-                            >
-                              {number.displayNumber}
-                            </DropdownMenuRadioItem>
-                          ))}
-                      </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </FormControl>
-              )}
-
-              <FormMessage />
-            </FormItem>
-          )}
+          selectedPhoneNumber={phoneNumber}
+          phoneNumbers={availablePhoneNumbers}
+          phoneNumberChanged={(value) => setPhoneNumber(value)}
         />
 
         <Button

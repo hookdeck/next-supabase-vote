@@ -265,10 +265,9 @@ export default function VoteForm() {
         />
 
         <PhoneNumberDropdown
+          name="phone_number"
           control={form.control}
-          selectedPhoneNumber={phoneNumber}
           phoneNumbers={availablePhoneNumbers}
-          phoneNumberChanged={(value) => setPhoneNumber(value)}
         />
 
         <Button
@@ -281,7 +280,4 @@ export default function VoteForm() {
       </form>
     </Form>
   );
-}
-function toE164(tel: string): any {
-  throw new Error("Function not implemented.");
 }

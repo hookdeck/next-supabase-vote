@@ -69,22 +69,7 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
     });
   }
 
-  const [phoneNumber, setPhoneNumber] = useState("");
   const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
-  const doesNotContainVoteNumber =
-    availablePhoneNumbers &&
-    vote.phone_number &&
-    availablePhoneNumbers.filter(
-      (number) =>
-        number.e164 === toStoredPhoneNumberFormat(vote.phone_number as string)
-    ).length === 0;
-
-  if (availablePhoneNumbers && vote.phone_number && doesNotContainVoteNumber) {
-    availablePhoneNumbers.push({
-      e164: toStoredPhoneNumberFormat(vote.phone_number),
-      displayNumber: toDisplayedPhoneNumberFormat(vote.phone_number),
-    });
-  }
 
   return (
     <Form {...form}>
@@ -177,9 +162,8 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
 
         <PhoneNumberDropdown
           control={form.control}
-          selectedPhoneNumber={phoneNumber}
           phoneNumbers={availablePhoneNumbers}
-          phoneNumberChanged={(value) => setPhoneNumber(value)}
+          name="phone_number"
         />
 
         <Button

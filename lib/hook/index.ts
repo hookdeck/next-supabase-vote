@@ -89,7 +89,7 @@ export function useAvailablePhoneNumbers(): UseQueryResult<
         console.error(error);
         throw new Error("Failed to fetch phone numbers");
       }
-      const usedPhoneNumbers = data.map((number) => number.phone_number);
+      const usedPhoneNumbers = data.map((row) => row.phone_number);
       const availableNumbers = configuredPhoneNumbers
         .filter((tel) => !usedPhoneNumbers.includes(tel))
         .map((tel) => {

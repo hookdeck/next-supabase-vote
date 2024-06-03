@@ -20,28 +20,27 @@ import {
 import { cn } from "@/lib/utils";
 
 import { FormattedNumber } from "@/lib/hook";
+import { Control } from "react-hook-form";
 
 export type PhoneNumberDropdownProps = {
-  control: any;
-  selectedPhoneNumber: string;
+  name: string;
+  control: Control<any>;
   phoneNumbers: FormattedNumber[] | undefined;
-  phoneNumberChanged: (value: string) => void;
 };
 
 export default function PhoneNumberDropdown({
   control,
-  selectedPhoneNumber,
   phoneNumbers,
-  phoneNumberChanged,
+  name,
 }: PhoneNumberDropdownProps) {
   return (
     <FormField
       control={control}
-      name="phone_number"
+      name={name}
       render={({ field }) => (
         <FormItem className="flex flex-col items-start">
           <FormLabel>Vote by Phone Number</FormLabel>
-          {phoneNumbers && phoneNumbers.length == 0 ? (
+          {!phoneNumbers || phoneNumbers.length == 0 ? (
             <FormDescription>No numbers available</FormDescription>
           ) : (
             <FormControl>
@@ -57,29 +56,18 @@ export default function PhoneNumberDropdown({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
-                  <DropdownMenuRadioGroup
-                    value={selectedPhoneNumber}
-                    onValueChange={(value) => {
-                      phoneNumberChanged(value);
-                      field.onChange(value);
-                    }}
-                  >
+                  <DropdownMenuRadioGroup onValueChange={field.onChange}>
                     <DropdownMenuRadioItem value="">
-                      {phoneNumbers && phoneNumbers.length == 0 ? (
-                        <span>No numbers available</span>
-                      ) : (
-                        <span>Not enabled</span>
-                      )}
+                      <span>Not enabled</span>
                     </DropdownMenuRadioItem>
-                    {phoneNumbers &&
-                      phoneNumbers.map((number) => (
-                        <DropdownMenuRadioItem
-                          key={number.e164}
-                          value={number.e164}
-                        >
-                          {number.displayNumber}
-                        </DropdownMenuRadioItem>
-                      ))}
+                    {phoneNumbers.map((number) => (
+                      <DropdownMenuRadioItem
+                        key={number.e164}
+                        value={number.e164}
+                      >
+                        {number.displayNumber}
+                      </DropdownMenuRadioItem>
+                    ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

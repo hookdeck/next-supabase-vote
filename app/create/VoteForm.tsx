@@ -267,6 +267,3 @@ export default function VoteForm() {
     </Form>
   );
 }
-function toE164(tel: string): any {
-  throw new Error("Function not implemented.");
-}

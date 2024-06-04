@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import createSupabaseServer from "../supabase/server";
 import { revalidatePath } from "next/cache";
 import { IVoteOptions } from "../types";
-import { Json } from "../types/supabase";
 
 export async function listActiveVotes() {
   const supabase = await createSupabaseServer();
@@ -65,8 +64,8 @@ export async function updateVoteById(
   },
   voteId: string,
 ) {
-  const suapbase = await createSupabaseServer();
-  const { error, data: vote } = await suapbase
+  const supabase = await createSupabaseServer();
+  const { error, data: vote } = await supabase
     .from("vote")
     .update({
       title: data.title,

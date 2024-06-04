@@ -2,7 +2,6 @@
 import React from "react";
 import dynamic from "next/dynamic";
 import { IVote } from "@/lib/types";
-import { toDisplayedPhoneNumberFormat } from "@/lib/utils";
 
 const TimeCountDown = dynamic(() => import("./TimeCountDown"), { ssr: false });
 

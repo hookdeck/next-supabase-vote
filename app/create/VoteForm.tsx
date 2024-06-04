@@ -60,7 +60,6 @@ export default function VoteForm() {
   const optionRef = useRef() as React.MutableRefObject<HTMLInputElement>;
 
   const [options, setOptions] = useState<{ id: string; label: string }[]>([]);
-  const [phoneNumber, setPhoneNumber] = useState("");
   const form = useForm<z.infer<typeof FormSchema>>({
     mode: "onSubmit",
     resolver: zodResolver(FormSchema),

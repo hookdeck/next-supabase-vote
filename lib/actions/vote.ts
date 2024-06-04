@@ -68,8 +68,8 @@ export async function updateVoteById(
   },
   voteId: string,
 ) {
-  const suapbase = await createSupabaseServer();
-  const { error, data: vote } = await suapbase
+  const supabase = await createSupabaseServer();
+  const { error, data: vote } = await supabase
     .from("vote")
     .update({
       title: data.title,

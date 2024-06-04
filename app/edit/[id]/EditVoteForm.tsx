@@ -18,12 +18,7 @@ import {
 import { CalendarIcon } from "@radix-ui/react-icons";
 import toast from "react-hot-toast";
 
-import {
-  cn,
-  nextWeek,
-  toDisplayedPhoneNumberFormat,
-  toStoredPhoneNumberFormat,
-} from "@/lib/utils";
+import { cn, nextWeek } from "@/lib/utils";
 import { format } from "date-fns";
 
 import { Input } from "@/components/ui/input";
@@ -38,7 +33,6 @@ import { updateVoteById } from "@/lib/actions/vote";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import { useState } from "react";
 import { useAvailablePhoneNumbers } from "@/lib/hook";
 import PhoneNumberDropdown from "@/components/phone/phone-number-dropdown";
 

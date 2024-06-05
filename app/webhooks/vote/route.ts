@@ -32,6 +32,8 @@ interface TwilioMessagingBody {
   AccountSid: string;
   From: string;
   ApiVersion: string;
+  _voteNumber: string;
+  _voteAdditionalText: string;
 }
 
 const signer = createSigner({
@@ -162,7 +164,7 @@ export async function POST(request: Request) {
   }
 
   const options = voteOptions.options as unknown as IVoteOptions;
-  const votedForOption = body.Body.trim().replace("#", "");
+  const votedForOption = body._voteNumber;
 
   console.log("options", options);
 

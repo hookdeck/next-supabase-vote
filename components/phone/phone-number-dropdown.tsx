@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { cn } from "@/lib/utils";
+import { cn, toDisplayedPhoneNumberFormat } from "@/lib/utils";
 
 import { FormattedNumber } from "@/lib/hook";
 import { Control } from "react-hook-form";
@@ -40,7 +40,7 @@ export default function PhoneNumberDropdown({
       render={({ field }) => (
         <FormItem className="flex flex-col items-start">
           <FormLabel>Vote by Phone Number</FormLabel>
-          {!phoneNumbers || phoneNumbers.length == 0 ? (
+          {!field.value && (!phoneNumbers || phoneNumbers.length == 0) ? (
             <FormDescription>No numbers available</FormDescription>
           ) : (
             <FormControl>
@@ -52,7 +52,9 @@ export default function PhoneNumberDropdown({
                       "w-full pl-3 text-left font-normal justify-start"
                     )}
                   >
-                    {field.value || "Not enabled"}
+                    {field.value
+                      ? toDisplayedPhoneNumberFormat(field.value)
+                      : "Not enabled"}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
@@ -60,14 +62,15 @@ export default function PhoneNumberDropdown({
                     <DropdownMenuRadioItem value="">
                       <span>Not enabled</span>
                     </DropdownMenuRadioItem>
-                    {phoneNumbers.map((number) => (
-                      <DropdownMenuRadioItem
-                        key={number.e164}
-                        value={number.e164}
-                      >
-                        {number.displayNumber}
-                      </DropdownMenuRadioItem>
-                    ))}
+                    {phoneNumbers &&
+                      phoneNumbers.map((number) => (
+                        <DropdownMenuRadioItem
+                          key={number.e164}
+                          value={number.e164}
+                        >
+                          {number.displayNumber}
+                        </DropdownMenuRadioItem>
+                      ))}
                   </DropdownMenuRadioGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

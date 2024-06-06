@@ -9,7 +9,6 @@ import { Twilio } from "twilio";
 
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
-
 const twilioClient = new Twilio(twilioAccountSid, twilioAuthToken);
 
 interface TwilioMessagingBody {
@@ -41,7 +40,7 @@ const signer = createSigner({
   algorithm: "HS256",
 });
 
-export function createSupabaseToken(userEmail: string, userId: string) {
+function createSupabaseToken(userEmail: string, userId: string) {
   const ONE_HOUR = 60 * 60;
   const exp = Math.round(Date.now() / 1000) + ONE_HOUR;
   const payload = {
@@ -80,8 +79,7 @@ export async function POST(request: Request) {
 
   const supabase = await createSupabaseServerAdmin();
 
-  // Lookup:
-  // 1. Find the user with the inbound "from" phone number
+  // Find the user with the inbound "from" phone number
   // Supabase Auth strips the "+" prefix from the phone number
   const from = toStoredPhoneNumberFormat(body.From).replace("+", "");
 
@@ -111,7 +109,7 @@ export async function POST(request: Request) {
     voter.id,
   );
 
-  const authenticatedClient = createClient(
+  const userClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -119,16 +117,16 @@ export async function POST(request: Request) {
     },
   );
   // can be used normally with RLS!
-  const user = await authenticatedClient.auth.getUser();
+  const user = await userClient.auth.getUser();
   console.log("Mapped to user", user);
 
-  // 2. Check which poll is associated with the "to" phone number
-  const voteNumber = toStoredPhoneNumberFormat(body.To);
+  // Check which poll is associated with the "to" phone number
+  const votePhoneNumber = toStoredPhoneNumberFormat(body.To);
 
-  const { data: voterPoll, error: voteError } = await authenticatedClient
+  const { data: vote, error: voteError } = await userClient
     .from("vote")
     .select("*")
-    .eq("phone_number", voteNumber)
+    .eq("phone_number", votePhoneNumber)
     .single();
 
   if (voteError) {
@@ -141,15 +139,14 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log("Found voterPoll", voterPoll);
+  console.log("Found vote", vote);
 
-  // 3. Validate the vote option
-  const { data: voteOptions, error: voteOptionsError } =
-    await authenticatedClient
-      .from("vote_options")
-      .select("options")
-      .eq("vote_id", voterPoll.id)
-      .single();
+  // Check that the vote option sent in the message is a valid option in the vote
+  const { data: voteOptions, error: voteOptionsError } = await userClient
+    .from("vote_options")
+    .select("options")
+    .eq("vote_id", vote.id)
+    .single();
 
   if (voteOptionsError) {
     console.error(voteOptionsError);
@@ -157,7 +154,7 @@ export async function POST(request: Request) {
     return new NextResponse(
       JSON.stringify({
         error:
-          `Error: could not find vote options for the poll with a poll with id "${voterPoll.id}"`,
+          `Error: could not find vote options for the poll with a poll with id "${vote.id}"`,
       }),
       { status: 404 },
     );
@@ -183,21 +180,21 @@ export async function POST(request: Request) {
     return new NextResponse(
       JSON.stringify({
         error:
-          `Error: could not find vote option sent in the body of the SMS message: "${votedForOption}" for poll with id "${voterPoll.id}"`,
+          `Error: could not find vote option sent in the body of the SMS message: "${votedForOption}" for poll with id "${vote.id}"`,
       }),
       { status: 404 },
     );
   }
 
-  // 4. Add the user's vote to the poll
-  const { error, data } = await authenticatedClient.rpc("update_vote", {
-    update_id: voterPoll.id,
+  // Register the user's vote to the poll
+  const { error, data } = await userClient.rpc("update_vote", {
+    update_id: vote.id,
     option: selectedOptionText,
   });
 
   if (error) {
     const errorMessage =
-      `Error: could not update the vote: "${votedForOption}" for poll with id "${voterPoll.id}"`;
+      `Error: could not update the vote: "${votedForOption}" for poll with id "${vote.id}"`;
     console.error(errorMessage, error);
 
     return new NextResponse(

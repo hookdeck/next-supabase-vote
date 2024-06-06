@@ -2,7 +2,9 @@
 
 A live poll Next.js application built with Supabase, Twilio, and Hookdeck.
 
-https://github.com/hookdeck/supapoll/assets/328367/991538ac-b43e-498f-a6e7-c9b641035d4e
+https://github.com/hookdeck/supapoll/assets/328367/b5171342-1d0b-4bdc-8d00-540907ebe571
+
+[supapoll.com](https://supapoll.com) is deployed to [Vercel](https://vercel.com).
 
 ## Setup
 

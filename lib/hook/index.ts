@@ -101,6 +101,5 @@ export function useAvailablePhoneNumbers(): UseQueryResult<
 
       return availableNumbers;
     },
-    staleTime: Infinity,
   });
 }

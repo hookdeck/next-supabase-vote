@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import VoteWrapper from "../components/VoteWrapper";
 import Info from "../components/Info";
-import { DEFAUTL_DESCRIPTION } from "@/lib/constant";
 import Config from "@/config";
 
 export async function generateStaticParams() {
@@ -23,29 +22,29 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 
   const { data } = await supabase
     .from("vote")
-    .select("*,users(user_name,avatar_url)")
+    .select("*,profile(full_name,avatar_url)")
     .eq("id", params.id)
     .single();
 
-  const url = "https://next-supabase-vote.vercel.app/";
+  const url = Config.siteUrl;
 
   return {
     title: data?.title,
     authors: {
-      name: data?.users?.user_name,
+      name: data?.profile?.full_name,
     },
-    description: data?.description || DEFAUTL_DESCRIPTION,
+    description: data?.description || Config.siteDescription,
     openGraph: {
-      description: data?.description || DEFAUTL_DESCRIPTION,
+      description: data?.description || Config.siteDescription,
       title: data?.title,
       url: url + "vote/" + data?.id,
       siteName: Config.siteName,
       images:
         url +
-        `og?author=${data?.users?.user_name}&author_url=${data?.users?.avatar_url}&title=${data?.title}`,
+        `og?author=${data?.profile?.full_name}&author_url=${data?.profile?.avatar_url}&title=${data?.title}`,
       type: "website",
     },
-    keywords: [Config.siteName, data?.users?.user_name, "dailywebcoding"],
+    keywords: [Config.siteName, data?.profile?.full_name],
   };
 }
 

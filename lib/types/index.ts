@@ -13,6 +13,7 @@ export type IVote = {
   end_date: string;
   id: string;
   title: string;
+  phone_number: string | null;
 };
 
 export type IComment = {

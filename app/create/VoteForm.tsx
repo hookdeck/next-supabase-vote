@@ -31,6 +31,9 @@ import { createVote } from "@/lib/actions/vote";
 import { Textarea } from "../../components/ui/textarea";
 import { IVoteOptions } from "@/lib/types";
 
+import { useAvailablePhoneNumbers } from "@/lib/hook";
+import PhoneNumberDropdown from "@/components/phone/phone-number-dropdown";
+
 const FormSchema = z
   .object({
     vote_options: z
@@ -43,6 +46,7 @@ const FormSchema = z
       .min(5, { message: "Title has a minimum characters of 5" }),
     description: z.string().optional(),
     end_date: z.date(),
+    phone_number: z.string(),
   })
   .refine(
     (data) => {
@@ -62,6 +66,7 @@ export default function VoteForm() {
     defaultValues: {
       title: "",
       vote_options: [],
+      phone_number: "",
     },
   });
 
@@ -104,6 +109,8 @@ export default function VoteForm() {
       error: "Fail to create vote",
     });
   }
+
+  const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
 
   return (
     <Form {...form}>
@@ -254,6 +261,12 @@ export default function VoteForm() {
               <FormMessage />
             </FormItem>
           )}
+        />
+
+        <PhoneNumberDropdown
+          name="phone_number"
+          control={form.control}
+          phoneNumbers={availablePhoneNumbers}
         />
 
         <Button

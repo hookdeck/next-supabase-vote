@@ -34,10 +34,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
+import { useAvailablePhoneNumbers } from "@/lib/hook";
+import PhoneNumberDropdown from "@/components/phone/phone-number-dropdown";
+
 const FormSchema = z.object({
   title: z.string().min(5, { message: "Title has a minimum characters of 5" }),
   end_date: z.date(),
   description: z.string().optional(),
+  phone_number: z.string(),
 });
 
 export default function EditVoteForm({ vote }: { vote: IVote }) {
@@ -48,6 +52,7 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
       title: vote.title,
       end_date: new Date(vote.end_date),
       description: vote.description || "",
+      phone_number: vote.phone_number || "",
     },
   });
 
@@ -58,6 +63,8 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
       error: (err) => "Fail to update vote. " + err.toString(),
     });
   }
+
+  const { data: availablePhoneNumbers } = useAvailablePhoneNumbers();
 
   return (
     <Form {...form}>
@@ -146,6 +153,12 @@ export default function EditVoteForm({ vote }: { vote: IVote }) {
               <FormMessage />
             </FormItem>
           )}
+        />
+
+        <PhoneNumberDropdown
+          control={form.control}
+          phoneNumbers={availablePhoneNumbers}
+          name="phone_number"
         />
 
         <Button

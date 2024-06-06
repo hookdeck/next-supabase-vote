@@ -28,6 +28,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
+    "fast-jwt": "^4.0.1",
+    "libphonenumber-js": "^1.11.3",
     "lucide-react": "^0.294.0",
     "next": "^14.2.3",
     "next-themes": "^0.2.1",
@@ -40,6 +42,7 @@
     "sharp": "^0.33.0",
     "tailwind-merge": "^2.1.0",
     "tailwindcss-animate": "^1.0.7",
+    "twilio": "^5.1.1",
     "uuid": "^9.0.1",
     "zod": "^3.22.4"
   },

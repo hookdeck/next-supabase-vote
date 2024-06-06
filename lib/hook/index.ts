@@ -1,6 +1,10 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { createSupabaseBrowser } from "../supabase/client";
-import { sortVoteOptionsBy } from "../utils";
+import {
+  sortVoteOptionsBy,
+  toDisplayedPhoneNumberFormat,
+  toStoredPhoneNumberFormat,
+} from "../utils";
 import { IComment } from "../types";
 
 export function useGetVote(id: string) {
@@ -55,5 +59,48 @@ export function useComment(voteId: string) {
       return [] as IComment[];
     },
     staleTime: Infinity,
+  });
+}
+
+const configuredPhoneNumbers = process.env.NEXT_PUBLIC_PHONE_NUMBERS
+  ? process.env.NEXT_PUBLIC_PHONE_NUMBERS.split(",")
+  : [];
+
+export type FormattedNumber = {
+  e164: string;
+  displayNumber: string;
+};
+
+export function useAvailablePhoneNumbers(): UseQueryResult<
+  FormattedNumber[]
+> {
+  const supabase = createSupabaseBrowser();
+
+  return useQuery({
+    queryKey: ["available-phone-numbers"],
+    queryFn: async () => {
+      // Get phone numbers used in all active votes
+      const { error, data } = await supabase
+        .from("vote")
+        .select("phone_number")
+        .filter("end_date", "gte", new Date().toISOString());
+
+      if (error) {
+        console.error(error);
+        throw new Error("Failed to fetch phone numbers");
+      }
+      const usedPhoneNumbers = data.map((row) => row.phone_number);
+
+      const availableNumbers = configuredPhoneNumbers
+        .filter((tel) => !usedPhoneNumbers.includes(tel))
+        .map((tel) => {
+          return {
+            e164: toStoredPhoneNumberFormat(tel),
+            displayNumber: toDisplayedPhoneNumberFormat(tel),
+          };
+        });
+
+      return availableNumbers;
+    },
   });
 }

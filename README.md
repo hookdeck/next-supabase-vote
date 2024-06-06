@@ -47,9 +47,14 @@ https://github.com/hookdeck/supapoll/assets/328367/b5171342-1d0b-4bdc-8d00-54090
     ```
     npm i
     ```
-14. Run the Hookdeck setup script to create a connection in Hookdeck to receive Twilio SMS webhooks and updated the Twilio phone numbers to use that URL for inbound SMS webhooks:
+14. Run the Hookdeck setup script to create a connection in Hookdeck to receive Twilio SMS webhooks and update the Twilio phone numbers to use that URL for inbound SMS webhooks:
     ```
     npm run setup
+    ```
+15. Install the [Hookdeck CLI](https://github.com/hookdeck/hookdeck-cli), run `hookdeck login`.
+16. Run the Hookdeck CLI to tunnel webhooks from Hookdeck to your localhost:
+    ```
+    hookdeck listen 8080 twilio-messaging
     ```
 
 ## Run SupaPoll

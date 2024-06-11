@@ -1,10 +1,24 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { IVoteOptions } from "./types";
+import { parsePhoneNumber } from "libphonenumber-js";
+
+export { parsePhoneNumber } from "libphonenumber-js";
+
+export function toStoredPhoneNumberFormat(phoneNumber: string) {
+  const parseNumber = parsePhoneNumber(phoneNumber);
+  return parseNumber.format("E.164");
+}
+
+export function toDisplayedPhoneNumberFormat(phoneNumber: string) {
+  const parseNumber = parsePhoneNumber(phoneNumber);
+  return parseNumber.formatInternational();
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
 export function nextWeek() {
   let currentDate = new Date();
   let nextWeekDate = new Date();

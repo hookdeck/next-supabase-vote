@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
       siteName: Config.siteName,
       images:
         url +
-        `og?author=${data?.profile?.full_name}&author_url=${data?.profile?.avatar_url}&title=${data?.title}`,
+        `/og?author=${data?.profile?.full_name}&author_url=${data?.profile?.avatar_url}&title=${data?.title}`,
       type: "website",
     },
     keywords: [Config.siteName, data?.profile?.full_name],

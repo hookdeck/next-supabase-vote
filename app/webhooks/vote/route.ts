@@ -127,6 +127,7 @@ export async function POST(request: Request) {
     .from("vote")
     .select("*")
     .eq("phone_number", votePhoneNumber)
+    .filter("end_date", "gte", new Date().toISOString())
     .single();
 
   if (voteError) {

@@ -12,7 +12,7 @@ import RegisterPhone from "@/components/phone/register-phone";
 const inter = Space_Grotesk({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://next-supabase-vote.vercel.app/"),
+  metadataBase: new URL(Config.siteUrl!),
 
   title: {
     template: `%s | ${Config.siteName}`,

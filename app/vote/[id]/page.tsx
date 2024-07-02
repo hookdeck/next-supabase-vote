@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
 
   const { data } = await supabase
     .from("vote")
-    .select("*,profile(full_name,avatar_url)")
+    .select("*, profile(full_name, avatar_url)")
     .eq("id", params.id)
     .single();
 
